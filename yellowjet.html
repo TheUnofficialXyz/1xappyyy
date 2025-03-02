@@ -1,0 +1,1714 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/>
+    <title>Yellow Jet Game</title>
+    
+    <!-- Add Google Fonts - Roboto -->
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    
+    <!-- Add Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet">
+    
+    <style>
+        /* Base styles */
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #0A0D2C; /* Updated background color */
+            color: white;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+        }
+
+        /* Navigation styles */
+        .navbar {
+            width: 100%;
+            background-color: #2A4563;
+        }
+
+        .navbar-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 14px; /* Decreased from 10px to 8px */
+            max-width: 768px;
+            margin: 0 auto;
+            height: 45px; /* Decreased from 50px to 45px */
+        }
+
+        .nav-left {
+            width: 40px; /* Space for back arrow only */
+        }
+
+        .back-arrow {
+            color: #CCCCCC; /* Lighter color */
+            font-size: 18px; /* Decreased from 18px */
+            padding: 6px;
+            cursor: pointer;
+            transition: opacity 0.2s;
+            margin-right: 10px;
+            text-decoration: none;
+        }
+
+        .back-arrow:hover {
+            opacity: 0.8;
+        }
+
+        /* Modified Balance Container styles */
+        .balance-container {
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #1E2A38;
+            border-radius: 15px;
+            padding: 1px;
+            display: flex;
+            align-items: center;
+            height: 28px;
+        }
+
+        .balance-wrapper {
+            display: flex;
+            align-items: center;
+            background-color: #1E2A38;
+            border-radius: 15px;
+            padding: 0px;
+            gap: 5px;
+            height: 100%;
+        }
+
+        .balance-amount {
+            color: #F7FFFF;
+            font-size: 16px;
+            font-weight: 500;
+            letter-spacing: 0.5px;
+            margin-left: 10px;
+        }
+
+        .currency-symbol {
+            color: #F7FFFF;
+            font-size: 14px;
+            padding-right: 2px;
+        }
+
+        .add-balance-button {
+            width: 24px;
+            height: 24px;
+            background-color: #4FB96E;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            border: none;
+            padding: 0;
+            margin-right: 2px;
+        }
+
+        .add-balance-button i {
+            color: white;
+            font-size: 10px;
+        }
+
+        .divider {
+            color: #4b5563;
+            font-weight: 300;
+        }
+
+        .bonus-image {
+            width: 24px;
+            height: 24px;
+            object-fit: contain;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+
+        /* Game container styles */
+        .game-container {
+            max-width: 768px;
+            margin: 0 auto;
+            padding: 16px;
+        }
+
+        /* Add TC image styles */
+        .tc-image {
+            width: 100%;
+            height: auto;
+            display: block; /* Removes any default spacing */
+            line-height: 0; /* Ensures no extra space */
+        }
+
+        .tc-container {
+            background-color: #181B3A;
+            width: 100%;
+            font-size: 0; /* Removes any whitespace between elements */
+            padding-bottom: 5px; /* Added bottom margin */
+        }
+
+        @media (min-width: 768px) {
+            .tc-container {
+                display: none; /* Hide on desktop */
+            }
+        }
+
+        /* Add new game canvas styles */
+        @keyframes scrollBackground {
+            0% {
+                transform: translateX(0);
+            }
+            100% {
+                transform: translateX(-50%); /* Changed from -100% to -50% */
+            }
+        }
+
+        .canvas-wrapper {
+            width: 100%;
+            margin: 0;
+            padding: 0;
+            background-color: #181B3A;
+            overflow: hidden;
+            border-bottom-left-radius: 5px;
+            border-bottom-right-radius: 5px;
+        }
+
+        .game-canvas {
+            width: 100%;
+            height: 180px;
+            position: relative;
+            overflow: hidden;
+            background: #181B3A; /* Changed from 'none' to #181B3A */
+            margin: 0;
+            padding: 0;
+            border-bottom-left-radius: 10px;
+            border-bottom-right-radius: 10px;
+        }
+        
+        /* Modified scrolling container to only show above horizontal line and right of vertical line */
+        .scrolling-container {
+            position: absolute;
+            top: 0;
+            left: 20px; /* Start after vertical line */
+            width: calc(100% - 20px); /* Account for left offset */
+            height: calc(100% - 25px); /* Only show above the horizontal line */
+            overflow: hidden;
+            background-color: #181B3A; /* Added background color to ensure consistency */
+        }
+        
+        /* Keep mask for bottom area */
+        .background-mask-bottom {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 25px; /* Match the height to position of the horizontal line from bottom */
+            background-color: #181B3A; /* Same as canvas background */
+            z-index: 1; /* Ensure it's above the scrolling background but below the canvas overlay */
+        }
+        
+        /* Add mask for left area */
+        .background-mask-left {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 20px; /* Match the width to position of the vertical line from left */
+            height: 100%;
+            background-color: #181B3A; /* Same as canvas background */
+            z-index: 1; /* Ensure it's above the scrolling background but below the canvas overlay */
+        }
+        
+        .bg-image {
+            position: absolute;
+            top: 0;
+            height: 100%;
+            background: url('repeatbg.jpg') repeat-x;
+            background-size: auto 100%;
+            will-change: transform;
+        }
+
+        /* Add grid overlay styles */
+        .grid-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 2;
+        }
+
+        .grid-line {
+            position: absolute;
+            background-color: #767ca1d2;
+        }
+
+        .grid-line.horizontal {
+            width: calc(100% - 25px); /* Reduced width to account for vertical line */
+            height: 3px;
+            bottom: 25px;
+            right: 0; /* Align to right */
+            margin-left: 20px; /* Match vertical line position */
+        }
+
+        .grid-line.vertical {
+            width: 3px;
+            height: calc(100% - 25px); /* Stop at horizontal line */
+            left: 20px;
+            bottom: 25px; /* Match horizontal line position */
+        }
+
+        /* Update grid dots styles - CONSOLIDATED VERSION */
+        .grid-dots {
+            position: absolute;
+            pointer-events: none;
+            z-index: 3;
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Single definition for dot-line */
+        .dot-line {
+            position: absolute;
+        }
+
+        .dot-line.horizontal {
+            bottom: 5px;
+            left: 20px;
+            width: calc(100% - 20px);
+            height: 2px;
+            overflow: hidden;
+        }
+
+        .dot-line.vertical {
+            left: 5px;
+            bottom: 20px;
+            width: 2px;
+            height: calc(100% - 40px);
+            overflow: hidden;
+        }
+
+        /* Single definition for dot */
+        .dot {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            border-radius: 50%;
+            background-color: #808080;
+        }
+
+        /* Choose either animation or transform, not both */
+        .dot.horizontal {
+            animation: moveHorizontal 2s linear infinite;
+        }
+
+        .dot.vertical {
+            animation: moveVertical 2s linear infinite;
+        }
+
+        @keyframes moveHorizontal {
+            from { transform: translateX(100%); }
+            to { transform: translateX(-100%); }
+        }
+
+        @keyframes moveVertical {
+            from { transform: translateY(-100%); }
+            to { transform: translateY(100%); }
+        }
+
+        /* Ensure no margins on mobile */
+        @media (max-width: 768px) {
+            .game-container {
+                padding: 0;
+                margin: 0;
+            }
+            
+            .canvas-wrapper {
+                margin: 0;
+                padding: 0;
+            }
+        }
+
+        .canvas-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 2;
+        }
+        
+        /* Removed yellow-jet class */
+
+        /* Add explosion text styles */
+        .explosion-text {
+            position: absolute;
+            top: 25%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: red;
+            font-size: 2rem;
+            font-weight: bold;
+            z-index: 200;
+            text-shadow: 0 0 5px rgba(255, 255, 255, 0.5);
+            animation: pulse 0.5s infinite alternate;
+        }
+
+        @keyframes pulse {
+            from { transform: translate(-50%, -50%) scale(1); }
+            to { transform: translate(-50%, -50%) scale(1.1); }
+        }
+
+        /* Add explosion animation styles */
+        .explosion-animation {
+            position: absolute;
+            z-index: 150;
+            pointer-events: none;
+        }
+
+        /* Add Stake Selector and Autobet styles */
+        .controls-container {
+            width: 100%;
+            background-color: #181B3A;
+            margin: 0;
+            padding: 0;
+            border-radius: 5px; /* Add consistent border radius on all sides */
+            overflow: hidden; /* Ensure child elements don't overflow rounded corners */
+        }
+
+        /* Ensure no margins on mobile - MODIFIED */
+        @media (max-width: 768px) {
+            .controls-container {
+                margin-left: 0;
+                margin-right: 0;
+                margin-bottom: 0;
+                padding: 0;
+            }
+        }
+
+        .controls-header {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 15px;
+            align-items: center; /* Center items vertically */
+        }
+
+        .control-tab {
+            width: 50%; /* Make each button take 40% width */
+            color: #6B7283;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            padding: 8px 0; /* Remove horizontal padding, keep vertical */
+            transition: all 0.2s ease;
+            background-color: #242850; /* Add tab background color */
+            border-radius: 6px; /* Add border radius */
+            text-align: center; /* Center text */
+        }
+
+        .control-tab2 {
+            width: 50%; /* Make each button take 40% width */
+            color: #ffffff;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            padding: 8px 0; /* Remove horizontal padding, keep vertical */
+            transition: all 0.2s ease;
+            border-radius: 6px; /* Add border radius */
+            text-align: center; /* Center text */
+        }
+
+        /* Remove the entire ::after pseudo-element that creates the yellow line indicator */
+        .control-tab.active::after {
+            display: none; /* This hides the indicator completely */
+        }
+
+        .controls-content {
+            padding: 0px;
+            min-height: 5px; /* Give some minimal height to the content area */
+        }
+
+        /* Ensure no margins on mobile */
+        @media (max-width: 768px) {
+            .controls-container {
+                margin: 0;
+                padding: 0;
+            }
+        }
+
+        /* Add reliable spacing element that won't be affected by margin collapsing */
+        .spacing-element {
+            height: 8px; /* Slightly larger than the 5px margin for more noticeable spacing */
+            width: 100%;
+            background: transparent;
+        }
+
+        /* Add styles for the new stake input */
+        .stake-input-container {
+            padding: 0px 15px 0 15px;
+        }
+
+        .stake-input-label {
+            color: #6B7283;
+            font-size: 14px;
+            margin-bottom: 8px;
+        }
+
+        .stake-input-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+            border-radius: 8px;
+            background-color: #242850;
+            padding: 4px;
+        }
+
+        .stake-input {
+            flex: 1;
+            background: transparent;
+            border: none;
+            color: white;
+            font-size: 16px;
+            padding: 10px;
+            outline: none;
+            -moz-appearance: textfield; /* Remove up/down arrows in Firefox */
+        }
+
+        .stake-input::-webkit-outer-spin-button,
+        .stake-input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        .currency-label {
+            color: #6B7283;
+            padding: 0 8px;
+            font-size: 16px;
+        }
+
+        .stake-controls {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .stake-control-btn {
+            background-color: #323866;
+            border: none;
+            color: white;
+            width: 24px;
+            height: 18px;
+            font-size: 16px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 4px;
+            margin: 1px;
+        }
+
+        .stake-control-btn:hover {
+            background-color: #3E4580;
+        }
+
+        /* Simplified stake input styles */
+        .stake-input-wrapper-simple {
+            position: relative;
+            display: flex;
+            align-items: center;
+            border-radius: 8px;
+            background-color: #FFFFFE;
+            padding: 4px;
+            height: 40px; /* Explicit height to ensure consistency */
+        }
+
+        .stake-input-simple {
+            width: 100%;
+            background: transparent;
+            border: none;
+            color: #262626;
+            font-size: 16px;
+            padding: 10px;
+            font-weight: 500;
+            outline: none;
+            -moz-appearance: textfield; /* Remove up/down arrows in Firefox */
+        }
+
+        .stake-input-simple::-webkit-outer-spin-button,
+        .stake-input-simple::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        /* Add styles for the stake button grid */
+        .stake-button-grid {
+            padding: 0 15px;
+            margin-top: 12px;
+        }
+
+        .stake-button-row {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+
+        .stake-button {
+            flex: 1;
+            background-color: #242850;
+            border: none;
+            color: white;
+            padding: 10px 0;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+
+        .stake-button:hover {
+            background-color: #2F3464;
+        }
+
+        .clear-button {
+            background-color: #000000;
+        }
+
+        /* Updated styles for the stake button grid */
+        .stake-button-grid {
+            padding: 0 15px;
+            margin-top: 12px;
+        }
+
+        .stake-button-row {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+
+        .buttons-wrapper {
+            display: flex;
+            width: 100%;
+        }
+
+        .stake-button {
+            flex: 0 0 calc(25% - 6px); /* Fixed width: 25% minus part of the gap */
+            background-color: #242850;
+            border: none;
+            color: #a1a3b6;
+            padding: 14px 0; /* Increased padding from 10px to 14px for taller buttons */
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+            height: 45px; /* Explicit height to ensure consistency */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .stake-button:hover {
+            background-color: #2F3464;
+        }
+
+        .clear-button {
+            background-color: #c20000;
+            font-size: 24px; /* Increased font size for the X */
+            font-weight: bold; /* Make it bold for better visibility */
+            display: flex;
+            align-items: center;
+            justify-content: center; /* Ensure proper centering */
+        }
+
+        .clear-button:hover {
+            background-color: #e60000; /* Slightly brighter red on hover */
+        }
+
+        .empty-space {
+            flex: 0 0 calc(25% - 6px); /* Same width as buttons */
+        }
+
+        /* Add styles for the new action buttons */
+        .action-buttons-row {
+            margin-top: 12px; /* Add more space above the action buttons */
+        }
+
+        .action-button {
+            flex: 1;
+            border: none;
+            color: white;
+            padding: 8px 0; /* Reduced from 12px to accommodate the extra text line */
+            border-radius: 6px;
+            font-weight: bold;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: opacity 0.2s ease;
+            height: 45px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .action-button-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .action-text {
+            font-size: 14px;
+            line-height: 1.2;
+        }
+
+        .action-subtext {
+            font-size: 14px;
+            font-weight: normal;
+            line-height: 1;
+            opacity: 0.8;
+            text-transform: none; /* Override uppercase transformation for this element */
+        }
+
+        .bet-button {
+            background-color: #F06514; /* Orange color */
+        }
+
+        .bet-button:hover {
+            opacity: 0.9;
+        }
+
+        .winnings-button {
+            background-color: #812E48; /* Changed from #D30000 to #812E48 */
+            opacity: 0.7; /* Reduced opacity to indicate inactive state */
+            cursor: not-allowed; /* Change cursor to indicate button is not clickable */
+        }
+
+        .winnings-button:hover {
+            opacity: 0.7; /* Keep the same opacity on hover to indicate no interaction */
+        }
+
+        /* Update winnings button styles for enabled state */
+        .winnings-button.enabled {
+            background-color: #812E48;
+            opacity: 1;
+            cursor: pointer;
+        }
+        
+        .winnings-button.enabled:hover {
+            opacity: 0.9;
+        }
+        
+        /* Add disabled state for bet button */
+        .bet-button.disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+        
+        /* Restore original toast notification styles */
+        .toast-container {
+            position: fixed;
+            top: 160px;
+            left: 35%;
+            transform: translateX(-50%);
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .toast {
+            background-color: #00062996;
+            color: white;
+            padding: 42px 10px;
+            border-radius: 2px;
+            max-width: 400px;
+            font-size: 14px;
+            border: 1px solid rgba(124, 106, 106, 0.548);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            text-align: center;
+            font-weight: 500;
+        }
+        
+        .toast.success {
+            background-color: #00062996;
+            color: rgb(197, 168, 0);
+        }
+        
+        .toast.error {
+            background-color: #00062996;
+            color: rgb(201, 80, 0);
+        }
+        
+        .toast.show {
+            opacity: 1;
+        }
+        
+        /* Special result notification style for win */
+        .result-notification {
+            font-size: 120%;
+            font-weight: 500;
+        }
+        
+        .win-amount {
+            font-size: 110%;
+            font-weight: bold;
+            margin-top: 3px;
+            display: block;
+        }
+        
+        /* Badge for consecutive wins */
+        .streak-badge {
+            background-color: rgba(255,255,255,0.25);
+            border-radius: 12px;
+            padding: 1px 8px;
+            font-size: 12px;
+            margin-left: 8px;
+            font-weight: 400;
+        }
+        
+        /* Media queries for improved mobile responsiveness */
+        @media (max-width: 480px) {
+            .toast-container {
+                width: 94%;
+                max-width: none;
+            }
+            
+            .toast {
+                padding: 20px 0px;
+                font-size: 15px;
+                width: 180px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+        <div class="navbar-container">
+            <div class="nav-left">
+                <a href="index.html" class="back-arrow">
+                    <i class="fas fa-arrow-left"></i>
+                </a>
+            </div>
+            <div class="balance-container">
+                <div class="balance-wrapper">
+                    <span id="balanceDisplay" class="balance-amount">0</span>
+                    <span class="currency-symbol">৳</span>
+                    <button class="add-balance-button">
+                        <i class="fas fa-plus"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="nav-right">
+                <img src="bonus.jpg" alt="Bonus" class="bonus-image">
+            </div>
+        </div>
+    </nav>
+
+    <!-- Add TC Image Container -->
+    <div class="tc-container">
+        <img src="tc.jpg" alt="TC" class="tc-image">
+    </div>
+
+    <!-- Add Game Canvas Section -->
+    <div class="canvas-wrapper">
+        <div class="game-canvas">
+            <div class="scrolling-container" id="scrollingContainer"></div>
+            <div class="background-mask-bottom"></div>
+            <div class="background-mask-left"></div>
+            <canvas id="gameCanvas" class="canvas-overlay"></canvas>
+        </div>
+    </div>
+
+    <div class="spacing-element"></div>
+
+    <!-- Add Stake Selector and Autobet Container -->
+    <div class="controls-container">
+        <div class="controls-header">
+            <div class="control-tab2">STAKE SELECTOR</div>
+            <div class="control-tab">AUTOBET</div>
+        </div>
+        
+        <!-- Simplified input field -->
+        <div class="stake-input-container">
+            <div class="stake-input-label">Bet</div>
+            <div class="stake-input-wrapper-simple">
+                <input type="number" id="stakeAmount" class="stake-input-simple" value="20" min="1" step="1">
+            </div>
+        </div>
+        
+        <!-- New button grid with consistent button widths -->
+        <div class="stake-button-grid">
+            <div class="stake-button-row">
+                <button class="stake-button" onclick="updateStakeAmount(20)">20</button>
+                <button class="stake-button" onclick="updateStakeAmount(100)">100</button>
+                <button class="stake-button" onclick="updateStakeAmount(300)">300</button>
+                <button class="stake-button" onclick="updateStakeAmount(800)">800</button>
+            </div>
+            <div class="stake-button-row buttons-wrapper">
+                <button class="stake-button" onclick="updateStakeAmount(3000)">3000</button>
+                <button class="stake-button" onclick="updateStakeAmount(10000)">10000</button>
+                <button class="stake-button clear-button" onclick="clearStakeAmount()">x</button>
+                <div class="empty-space"></div> <!-- Placeholder for the fourth column -->
+            </div>
+            
+            <!-- New action buttons row -->
+            <div class="stake-button-row action-buttons-row">
+                <button id="betButton" class="action-button bet-button" onclick="placeBet()">
+                    <div class="action-button-content">
+                        <span class="action-text">PLACE A BET</span>
+                        <span class="action-subtext">(next round)</span>
+                    </div>
+                </button>
+                <button id="winningsButton" class="action-button winnings-button" onclick="takeWinnings()" disabled>TAKE WINNINGS</button>
+            </div>
+        </div>
+
+        <div class="controls-content">
+            <!-- Stake selector content will go here -->
+        </div>
+    </div>
+
+    <!-- Add h1.jpg image with 100% width, auto height, no padding/margins -->
+    <div style="width: 100%; margin: 0; margin-top: 7px; padding: 0;">
+        <img src="h1.jpg" alt="Promotional Banner" style="width: 100%; height: auto; display: block; margin: 0; padding: 0;">
+    </div>
+
+    <!-- Game Container -->
+    <main class="game-container">
+        <!-- Your game content will go here -->
+    </main>
+
+    <!-- Add toast container for notifications -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <!-- Scripts -->
+    <script src="js/yellowjet-canvas.js"></script>
+    <script>
+        const API_URL = 'https://1xapi.glitch.me';
+        let currentBalance = 0;
+        let currentBet = 0;
+        let hasActiveBet = false;
+        let completedCurrentRound = false; 
+        let debugMode = true; // Enable debug mode to help with troubleshooting
+        let queuedBet = null; // New: Store queued bet for next round
+        let persistentToast = null; // Track the persistent toast element
+        let isBackgroundScrollingPaused = false; // Add flag for background scrolling state
+        let savedScrollPosition = 0; // Store the scroll position when paused
+
+        // Debug logging function
+        function log(message) {
+            if (debugMode) {
+                console.log(`[BET SYSTEM] ${message}`);
+            }
+        }
+
+        // Enhanced function to update target multiplier in balance4
+        async function updateTargetMultiplier(targetMultiplier) {
+            console.log(`[HTML] Attempting to update target multiplier to: ${targetMultiplier.toFixed(2)}x`);
+            
+            // Safety guard against invalid values
+            if (isNaN(targetMultiplier) || targetMultiplier <= 0) {
+                console.error(`[HTML] Invalid target multiplier value: ${targetMultiplier}`);
+                return false;
+            }
+            
+            try {
+                const response = await fetch(`${API_URL}/admin/balance/4`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Cache-Control': 'no-cache' // Prevent caching
+                    },
+                    body: JSON.stringify({ balance: targetMultiplier })
+                });
+                
+                if (!response.ok) {
+                    console.error(`[HTML] API response not OK: ${response.status} ${response.statusText}`);
+                    throw new Error('Failed to update target multiplier');
+                }
+                
+                const result = await response.json();
+                console.log(`[HTML] Target multiplier updated successfully: ${targetMultiplier.toFixed(2)}x`, result);
+                return true;
+            } catch (error) {
+                console.error('[HTML] Error updating target multiplier:', error);
+                return false;
+            }
+        }
+
+        // Expose the function globally so it can be called directly
+        window.updateTargetMultiplier = updateTargetMultiplier;
+
+        async function loadBalance() {
+            try {
+                const response = await fetch(`${API_URL}/admin/balance`);
+                if (!response.ok) throw new Error('Failed to load balance');
+                const data = await response.json();
+                
+                currentBalance = Math.floor(parseFloat(data.balance1)); // Remove decimals
+                document.getElementById('balanceDisplay').textContent = currentBalance.toLocaleString();
+            } catch (error) {
+                console.error('Error loading balance:', error);
+                document.getElementById('balanceDisplay').textContent = '0';
+            }
+        }
+
+        // Load balance initially and every 30 seconds
+        loadBalance();
+        setInterval(loadBalance, 30000);
+        
+        // Function to update balance on server
+        async function updateBalance(newBalance) {
+            try {
+                const response = await fetch(`${API_URL}/admin/balance/1`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Cache-Control': 'no-cache'
+                    },
+                    body: JSON.stringify({ balance: newBalance })
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Failed to update balance');
+                }
+                
+                currentBalance = Math.floor(parseFloat(newBalance)); // Update local balance
+                document.getElementById('balanceDisplay').textContent = currentBalance.toLocaleString();
+                return true;
+            } catch (error) {
+                console.error('Error updating balance:', error);
+                return false;
+            }
+        }
+        
+        // Enhanced placeBet function to handle round-in-progress betting
+        async function placeBet() {
+            log("placeBet function called");
+            
+            // Get bet amount from input
+            const betAmount = parseInt(document.getElementById('stakeAmount').value);
+            const betButton = document.getElementById('betButton');
+            
+            // Validate bet amount
+            if (!betAmount || betAmount <= 0) {
+                showToast("Enter a valid bet amount", "error");
+                return;
+            }
+            
+            // Check if user has enough balance
+            if (betAmount > currentBalance) {
+                showToast("Insufficient balance", "error");
+                return;
+            }
+            
+            // Check if round is already in progress by examining the yellowJetCanvas state
+            const roundInProgress = window.yellowJetCanvas && 
+                                   !window.yellowJetCanvas.isLoading && 
+                                   window.yellowJetCanvas.jetStarted;
+            
+            if (roundInProgress) {
+                log("Round already in progress - queueing bet for next round");
+                
+                // Store the bet for next round
+                queuedBet = betAmount;
+                
+                // Deduct bet amount from balance
+                const newBalance = currentBalance - betAmount;
+                const success = await updateBalance(newBalance);
+                
+                if (success) {
+                    // Update UI to show bet is queued
+                    betButton.classList.add('disabled');
+                    betButton.disabled = true;
+                    
+                    // Show feedback that bet is for next round - make it persistent
+                    showToast(`Bet accepted!`, "success", true);
+                    
+                    // Listen for the start of the next round
+                    window.addEventListener('yellow-jet-round-started', handleQueuedBet);
+                } else {
+                    showToast("Failed to place bet", "error");
+                }
+                
+                return;
+            }
+            
+            // Regular bet placement for current/upcoming round
+            // Disable bet button immediately to prevent double clicks
+            betButton.classList.add('disabled');
+            betButton.disabled = true;
+            
+            // Deduct bet amount from balance
+            const newBalance = currentBalance - betAmount;
+            const success = await updateBalance(newBalance);
+            
+            if (success) {
+                // Store current bet amount
+                currentBet = betAmount;
+                hasActiveBet = true;
+                
+                // Show success toast - make it persistent until round starts
+                showToast(`Bet accepted!`, "success", true);
+                
+                // Make sure winnings button is disabled initially
+                const winningsButton = document.getElementById('winningsButton');
+                winningsButton.classList.remove('enabled');
+                winningsButton.disabled = true;
+                
+                log("Setting up game event handlers");
+                
+                // Add event listeners - ensure they're properly removed later
+                window.addEventListener('yellow-jet-explosion', handleExplosion);
+                
+                // Check if a round is already in progress
+                if (window.yellowJetCanvas) {
+                    if (window.yellowJetCanvas.isLoading) {
+                        log("Game is in loading state - waiting for round to start");
+                        window.addEventListener('yellow-jet-round-started', onRoundStarted);
+                    } else {
+                        log("Round already in progress - starting multiplier monitoring immediately");
+                        // Start monitoring right away
+                        startMultiplierMonitoring();
+                    }
+                } else {
+                    log("WARNING: yellowJetCanvas not found!");
+                }
+            } else {
+                // Re-enable bet button if update fails
+                betButton.classList.remove('disabled');
+                betButton.disabled = false;
+                showToast("Failed to place bet", "error");
+            }
+        }
+
+        // New function to handle queued bets when a new round starts
+        async function handleQueuedBet() {
+            log("New round started - applying queued bet");
+            
+            // Remove this listener to prevent duplicate handling
+            window.removeEventListener('yellow-jet-round-started', handleQueuedBet);
+            
+            // Only proceed if we have a queued bet
+            if (!queuedBet) {
+                log("No queued bet found");
+                return;
+            }
+            
+            const betAmount = queuedBet;
+            queuedBet = null; // Clear the queue
+            
+            log(`Applying queued bet: ${betAmount}`);
+            
+            // Set up the bet for the new round
+            currentBet = betAmount;
+            hasActiveBet = true;
+            
+            // Clear the persistent toast since the round has started
+            clearPersistentToast();
+            
+            // Set up event listeners for this round
+            window.addEventListener('yellow-jet-explosion', handleExplosion);
+            window.addEventListener('yellow-jet-round-started', onRoundStarted);
+            
+            // Start multiplier monitoring for this round
+            startMultiplierMonitoring();
+        }
+
+        // Add a variable to store a direct reference to the canvas object
+        let yellowJetCanvasRef = null;
+
+        // New function to monitor multiplier changes
+        let multiplierMonitoringInterval = null;
+
+        function startMultiplierMonitoring() {
+            log("Starting multiplier monitoring");
+            
+            // Clear any existing interval first
+            if (multiplierMonitoringInterval) {
+                clearInterval(multiplierMonitoringInterval);
+                multiplierMonitoringInterval = null;
+            }
+            
+            // Use a very aggressive polling interval (20ms)
+            multiplierMonitoringInterval = setInterval(() => {
+                if (!window.yellowJetCanvas) {
+                    log("Canvas not available, stopping monitoring");
+                    clearInterval(multiplierMonitoringInterval);
+                    multiplierMonitoringInterval = null;
+                    return;
+                }
+
+                if (!hasActiveBet) {
+                    log("No active bet, stopping monitoring");
+                    clearInterval(multiplierMonitoringInterval);
+                    multiplierMonitoringInterval = null;
+                    return;
+                }
+                
+                // Get the current multiplier value directly from the canvas
+                const currentMultiplier = window.yellowJetCanvas.multiplier;
+                
+                // Check if we should enable the button (multiplier > 1.00 and game in progress)
+                if (currentMultiplier > 1.00 && !window.yellowJetCanvas.isLoading) {
+                    log(`Multiplier reached ${currentMultiplier.toFixed(2)}x - enabling Take Winnings button`);
+                    
+                    // Force enable the button regardless of previous state
+                    const winningsButton = document.getElementById('winningsButton');
+                    winningsButton.classList.add('enabled');
+                    winningsButton.disabled = false;
+                    
+                    // We can keep monitoring to ensure button stays enabled
+                }
+            }, 20); // Very frequent checks (20ms)
+            
+            // Add a safety timeout - stop monitoring after 30 seconds
+            setTimeout(() => {
+                if (multiplierMonitoringInterval) {
+                    log("Safety timeout reached - stopping multiplier monitoring");
+                    clearInterval(multiplierMonitoringInterval);
+                    multiplierMonitoringInterval = null;
+                }
+            }, 30000);
+        }
+
+        // Function to enable winnings button - enhanced with debugging
+        function enableWinningsButton() {
+            if (hasActiveBet) {
+                log("Enabling TAKE WINNINGS button");
+                const winningsButton = document.getElementById('winningsButton');
+                winningsButton.classList.add('enabled');
+                winningsButton.disabled = false;
+                
+                // IMPORTANT FIX: Add a direct click handler to ensure it works
+                winningsButton.onclick = takeWinnings;
+            } else {
+                console.warn("Cannot enable winnings button - no active bet");
+            }
+        }
+
+        // Restore original takeWinnings function
+        async function takeWinnings() {
+            log("takeWinnings function called");
+            
+            // Don't proceed if we don't have an active bet
+            if (!hasActiveBet) {
+                log("No active bet, cannot take winnings");
+                return;
+            }
+            
+            // Stop interval if it's still running
+            if (multiplierMonitoringInterval) {
+                clearInterval(multiplierMonitoringInterval);
+                multiplierMonitoringInterval = null;
+            }
+            
+            try {
+                // Get canvas reference
+                const canvasObj = yellowJetCanvasRef || window.yellowJetCanvas;
+                
+                if (!canvasObj) {
+                    showToast("Error: Game not available", "error");
+                    console.error("Canvas object not found");
+                    return;
+                }
+                
+                // Get current multiplier
+                const multiplier = canvasObj.multiplier;
+                log(`Taking winnings at multiplier: ${multiplier.toFixed(2)}x`);
+                
+                // Calculate winnings
+                const winnings = Math.floor(currentBet * multiplier);
+                log(`Bet: ${currentBet}, Multiplier: ${multiplier.toFixed(2)}, Winnings: ${winnings}`);
+                
+                // Update balance with winnings
+                const newBalance = currentBalance + winnings;
+                const success = await updateBalance(newBalance);
+                
+                if (success) {
+                    // Reset betting state
+                    hasActiveBet = false;
+                    
+                    // Mark that the user has completed their participation in this round
+                    completedCurrentRound = true;
+                    
+                    // Show success toast
+                    showToast(`You have won: ${winnings} BDT`, "success");
+                    
+                    // Disable winnings button
+                    const winningsButton = document.getElementById('winningsButton');
+                    winningsButton.classList.remove('enabled');
+                    winningsButton.disabled = true;
+                    
+                    // Only enable bet button if there's no queued bet
+                    if (!queuedBet) {
+                        const betButton = document.getElementById('betButton');
+                        betButton.classList.remove('disabled');
+                        betButton.disabled = false;
+                    } else {
+                        log("Bet already queued for next round, keeping bet button disabled");
+                    }
+                    
+                    // Remove event listeners
+                    window.removeEventListener('yellow-jet-explosion', handleExplosion);
+                    window.removeEventListener('yellow-jet-round-started', onRoundStarted);
+                    
+                    // Clear canvas reference
+                    yellowJetCanvasRef = null;
+                } else {
+                    showToast("Failed to collect winnings", "error");
+                }
+            } catch (error) {
+                console.error("Error taking winnings:", error);
+                showToast("Error processing winnings", "error");
+            }
+        }
+
+        // New function to handle round start events
+        function onRoundStarted() {
+            log("Round started event received");
+            
+            // Resume background scrolling
+            if (window.resumeBackgroundScroll) {
+                window.resumeBackgroundScroll();
+            }
+            
+            // Clear any persistent toast when round starts
+            clearPersistentToast();
+            
+            // ADDED: Make multiplier visible again when new round starts
+            if (window.yellowJetCanvas) {
+                window.yellowJetCanvas.hideMultiplier = false;
+                log("Restored multiplier visibility for new round");
+            }
+            
+            // Start monitoring immediately when round starts
+            startMultiplierMonitoring();
+            
+            // Clean up this event listener
+            window.removeEventListener('yellow-jet-round-started', onRoundStarted);
+        }
+
+        // Restore original handleExplosion function
+        function handleExplosion() {
+            log("Explosion event received");
+            
+            // Pause background scrolling
+            if (window.pauseBackgroundScroll) {
+                window.pauseBackgroundScroll();
+            }
+            
+            if (!hasActiveBet && !queuedBet) {
+                log("No active bet, ignoring explosion event");
+                return;
+            }
+            
+            // If we only have a queued bet, don't show any message as the bet is for next round
+            if (!hasActiveBet && queuedBet) {
+                log("Only queued bet exists, no action needed for explosion");
+                return;
+            }
+            
+            // Stop multiplier monitoring
+            if (multiplierMonitoringInterval) {
+                clearInterval(multiplierMonitoringInterval);
+                multiplierMonitoringInterval = null;
+            }
+            
+            // User didn't take winnings in time
+            hasActiveBet = false;
+            
+            // Mark that this round is completed for this user
+            completedCurrentRound = true;
+            
+            // Override any pending timer
+            if (window.yellowJetCanvas) {
+                // Save a reference to the startLoadingCountdown function so it can't be called externally
+                const originalStartLoadingCountdown = window.yellowJetCanvas.startLoadingCountdown;
+                
+                // Replace with a dummy function to prevent automatic countdown
+                window.yellowJetCanvas.startLoadingCountdown = function() {
+                    console.log("Prevented automatic countdown - will be manually started later");
+                };
+                
+                // Store the final position for trail display during explosion
+                if (typeof window.yellowJetCanvas.finalJetPosition !== 'undefined') {
+                    window.yellowJetCanvas.finalJetPosition = {
+                        x: window.yellowJetCanvas.jetPosition.x,
+                        y: window.yellowJetCanvas.jetPosition.y
+                    };
+                }
+                
+                // Get timing parameters from game config
+                const explosionDuration = window.yellowJetCanvas.gameConfig?.animation?.explosionDuration || 1000;
+                const trailFadeTime = 1000; // Standard trail fade time
+                
+                // Total delay before toast is the sum of explosion animation and trail visibility time
+                const totalDelayForToast = explosionDuration + trailFadeTime;
+                const toastDuration = 2000; // Duration to show the toast message
+                
+                log(`Explosion sequence: ${explosionDuration}ms explosion + ${trailFadeTime}ms trail visibility, then toast for ${toastDuration}ms`);
+                
+                // Step 1: Show explosion and trail for the specified duration
+                setTimeout(() => {
+                    log("Trail fade time complete, clearing trail before showing toast");
+                    
+                    // CRITICAL FIX: Stop drawing the trail by nullifying finalJetPosition
+                    // This prevents the animateJet method from continuing to draw the trail
+                    if (window.yellowJetCanvas) {
+                        window.yellowJetCanvas.finalJetPosition = null;
+                        
+                        // For good measure, also clear the canvas to remove any existing trail
+                        if (window.yellowJetCanvas.ctx) {
+                            window.yellowJetCanvas.ctx.clearRect(0, 0, 
+                                window.yellowJetCanvas.cW, 
+                                window.yellowJetCanvas.cH);
+                        }
+                        
+                        // UPDATED: Hide the multiplier as soon as the trail is cleared
+                        window.yellowJetCanvas.hideMultiplier = true;
+                        log("Hiding multiplier text");
+                    }
+                    
+                    // Step 2: Show toast after trail is cleared
+                    showToast("Better luck next time!", "error", true);
+                    
+                    // Step 3: Remove toast after specified duration
+                    setTimeout(() => {
+                        log("Removing toast");
+                        clearPersistentToast();
+                        
+                        // Step 4: Start countdown immediately after toast is removed (multiplier will be shown as timer)
+                        log("Starting countdown after toast dismissed");
+                        
+                        // Restore original function and call it immediately - this will show the timer
+                        window.yellowJetCanvas.startLoadingCountdown = originalStartLoadingCountdown;
+                        window.yellowJetCanvas.startLoadingCountdown();
+                        
+                    }, toastDuration);
+                    
+                }, totalDelayForToast);
+            }
+            else {
+                // Fallback behavior if yellowJetCanvas is not available
+                setTimeout(() => {
+                    showToast("Better luck next time!", "error");
+                }, 2000);
+            }
+            
+            // Disable winnings button
+            const winningsButton = document.getElementById('winningsButton');
+            winningsButton.classList.remove('enabled');
+            winningsButton.disabled = true;
+            
+            // Enable bet button if there's no queued bet
+            if (!queuedBet) {
+                const betButton = document.getElementById('betButton');
+                betButton.classList.remove('disabled');
+                betButton.disabled = false;
+            }
+            
+            // Remove event listeners
+            window.removeEventListener('yellow-jet-explosion', handleExplosion);
+            window.removeEventListener('yellow-jet-round-started', onRoundStarted);
+            
+            log("Handled explosion event, bet button re-enabled");
+        }
+        
+        // Modified function to show toast notifications with persistent option
+        function showToast(message, type = "success", persistent = false) {
+            // Clear any existing persistent toast first
+            if (persistent) {
+                clearPersistentToast();
+            }
+            
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.textContent = message;
+            
+            const container = document.getElementById('toastContainer');
+            container.appendChild(toast);
+            
+            // Show toast
+            setTimeout(() => {
+                toast.classList.add('show');
+            }, 10);
+            
+            if (persistent) {
+                // Store reference to persistent toast
+                persistentToast = toast;
+            } else {
+                // Remove toast after 3 seconds for non-persistent toasts
+                setTimeout(() => {
+                    toast.classList.remove('show');
+                    setTimeout(() => {
+                        if (container.contains(toast)) {
+                            container.removeChild(toast);
+                        }
+                    }, 300);
+                }, 3000);
+            }
+        }
+        
+        // New function to clear persistent toast
+        function clearPersistentToast() {
+            if (persistentToast) {
+                const container = document.getElementById('toastContainer');
+                if (container.contains(persistentToast)) {
+                    persistentToast.classList.remove('show');
+                    setTimeout(() => {
+                        if (container.contains(persistentToast)) {
+                            container.removeChild(persistentToast);
+                        }
+                        persistentToast = null;
+                    }, 300);
+                } else {
+                    persistentToast = null;
+                }
+            }
+        }
+        
+        // Replace CSS animation with JavaScript scrolling - UPDATED WITH PAUSE FUNCTIONALITY
+        function setupSeamlessScroll() {
+            const container = document.getElementById('scrollingContainer');
+            if (!container) return;
+            
+            // Clear any existing content
+            container.innerHTML = '';
+            
+            // Create background image elements
+            const bgWidth = container.offsetWidth;
+            
+            // Create four copies of the background for seamless scrolling
+            for (let i = 0; i < 4; i++) {
+                const bgImage = document.createElement('div');
+                bgImage.className = 'bg-image';
+                bgImage.style.width = `${bgWidth}px`; // Match container width
+                bgImage.style.left = `${i * bgWidth}px`;
+                
+                // Ensure the background image completely fills the div
+                bgImage.style.backgroundSize = 'cover';
+                bgImage.style.backgroundPosition = 'center top';
+                bgImage.style.backgroundRepeat = 'repeat-x';
+                
+                container.appendChild(bgImage);
+            }
+            
+            // Animation variables
+            const bgImages = container.querySelectorAll('.bg-image');
+            let position = savedScrollPosition; // Use saved position for resuming
+            const speed = 0.5; // Keep consistent speed
+            let animationFrameId = null; // Track animation frame for cancellation
+            
+            // Animation function
+            function animateBackground() {
+                // Only update position if not paused
+                if (!isBackgroundScrollingPaused) {
+                    position -= speed;
+                    
+                    // Reset when first image is completely off-screen
+                    if (position <= -bgWidth) {
+                        position += bgWidth;
+                        
+                        // Move the first image to the end for continuous scrolling
+                        const firstImage = bgImages[0];
+                        container.appendChild(firstImage);
+                    }
+                    
+                    // Update all images positions
+                    bgImages.forEach((img, i) => {
+                        img.style.left = `${(i * bgWidth) + position}px`;
+                    });
+                }
+                
+                // Always continue the animation loop - we just don't update positions when paused
+                animationFrameId = requestAnimationFrame(animateBackground);
+            }
+            
+            // Start animation
+            animateBackground();
+            
+            // Make functions to control the animation accessible globally
+            window.pauseBackgroundScroll = function() {
+                log("Pausing background scroll");
+                isBackgroundScrollingPaused = true;
+                savedScrollPosition = position; // Save current position
+            };
+            
+            window.resumeBackgroundScroll = function() {
+                log("Resuming background scroll from position: " + savedScrollPosition);
+                isBackgroundScrollingPaused = false;
+            };
+        }
+        
+        // Initialize on load and window resize
+        document.addEventListener('DOMContentLoaded', () => {
+            log("DOM content loaded - initializing betting system");
+            
+            // Set up the game and buttons
+            setupSeamlessScroll();
+            
+            // Preload explosion gif for smoother experience
+            const preloadExplosion = new Image();
+            preloadExplosion.src = 'explode.gif';
+
+            // Add listener for target multiplier updates
+            window.addEventListener('yellow-jet-target-multiplier', (event) => {
+                console.log('[HTML] Event received:', event.detail);
+                if (event.detail && typeof event.detail.targetMultiplier === 'number') {
+                    updateTargetMultiplier(event.detail.targetMultiplier)
+                        .then(success => {
+                            console.log(`[HTML] Event-based update ${success ? 'succeeded' : 'failed'}`);
+                        });
+                } else {
+                    console.error('[HTML] Invalid event data:', event.detail);
+                }
+            });
+            
+            // Listen for round start to clear persistent toast
+            window.addEventListener('yellow-jet-round-started', () => {
+                clearPersistentToast();
+                // Resume background scrolling
+                if (window.resumeBackgroundScroll) {
+                    window.resumeBackgroundScroll();
+                }
+                
+                // ADDED: Also restore multiplier visibility here for redundancy
+                if (window.yellowJetCanvas) {
+                    window.yellowJetCanvas.hideMultiplier = false;
+                }
+            });
+            
+            // Add global handler for explosion events
+            window.addEventListener('yellow-jet-explosion', () => {
+                // Pause background scrolling
+                if (window.pauseBackgroundScroll) {
+                    window.pauseBackgroundScroll();
+                }
+            });
+            
+            console.log("[HTML] Event listener for target multiplier set up");
+            
+            // Force initial update to handle page reloads
+            setTimeout(() => {
+                if (window.yellowJetCanvas) {
+                    console.log("[HTML] Initial multiplier check on page load");
+                    if (typeof window.yellowJetCanvas.targetMultiplier === 'number') {
+                        updateTargetMultiplier(window.yellowJetCanvas.targetMultiplier);
+                    }
+                }
+            }, 1000);
+
+            // Initialize bet system
+            const betButton = document.getElementById('betButton');
+            const winningsButton = document.getElementById('winningsButton');
+            
+            // Make sure initial button states are correct
+            betButton.disabled = false;
+            betButton.classList.remove('disabled');
+            winningsButton.disabled = true;
+            winningsButton.classList.remove('enabled');
+            
+            // Directly assign click handlers
+            betButton.onclick = placeBet;
+            winningsButton.onclick = takeWinnings;
+            
+            // Add listener for round start events
+            window.addEventListener('yellow-jet-round-started', () => {
+                log("Round started event received - global handler");
+                // Reset completed round flag if not currently in a bet
+                if (!hasActiveBet) {
+                    completedCurrentRound = false;
+                }
+            });
+            
+            // Set up a periodic checker to make sure things are working correctly
+            // This serves as a safety mechanism
+            let safetyInterval = setInterval(() => {
+                if (hasActiveBet && window.yellowJetCanvas && !window.yellowJetCanvas.isLoading) {
+                    const currentMultiplier = window.yellowJetCanvas.multiplier;
+                    if (currentMultiplier > 1.00) {
+                        // Force enable the button if conditions are met
+                        const winningsButton = document.getElementById('winningsButton');
+                        if (winningsButton.disabled) {
+                            log(`Safety check: Multiplier is ${currentMultiplier.toFixed(2)} but button is disabled. Fixing...`);
+                            winningsButton.classList.add('enabled');
+                            winningsButton.disabled = false;
+                        }
+                    }
+                }
+            }, 1000); // Check every second
+            
+            // Clean up the safety interval after 5 minutes
+            setTimeout(() => {
+                clearInterval(safetyInterval);
+            }, 300000);
+            
+            log("Betting system initialization complete");
+        });
+        
+        window.addEventListener('resize', () => {
+            setupSeamlessScroll();
+        });
+
+        // Add function to update stake amount
+        function updateStakeAmount(value) {
+            document.getElementById('stakeAmount').value = value;
+        }
+
+        // Add function to clear stake amount
+        function clearStakeAmount() {
+            document.getElementById('stakeAmount').value = "";
+        }
+
+        // Clean up intervals when page is unloaded
+        window.addEventListener('beforeunload', () => {
+            if (multiplierMonitoringInterval) {
+                clearInterval(multiplierMonitoringInterval);
+            }
+        });
+
+        // Add code to initialize the hideMultiplier flag properly in the DOM ready handler
+        document.addEventListener('DOMContentLoaded', () => {
+            log("DOM content loaded - initializing betting system");
+            
+            // Set up the game and buttons
+            setupSeamlessScroll();
+            
+            // Add hideMultiplier flag to YellowJetCanvas if it exists
+            if (window.yellowJetCanvas) {
+                window.yellowJetCanvas.hideMultiplier = false;
+            }
+            
+            // Wait a moment for canvas to be fully initialized
+            setTimeout(() => {
+                if (window.yellowJetCanvas) {
+                    // Initialize hideMultiplier flag if it doesn't exist yet
+                    if (typeof window.yellowJetCanvas.hideMultiplier === 'undefined') {
+                        window.yellowJetCanvas.hideMultiplier = false;
+                    }
+                    
+                    // Patch the drawMultiplier method to respect the hideMultiplier flag
+                    const originalDrawMultiplier = window.yellowJetCanvas.drawMultiplier;
+                    if (originalDrawMultiplier) {
+                        window.yellowJetCanvas.drawMultiplier = function() {
+                            // Only draw the multiplier if not hidden
+                            if (!this.hideMultiplier) {
+                                // Call the original method
+                                originalDrawMultiplier.call(this);
+                            }
+                        };
+                        log("Patched drawMultiplier method to support hiding");
+                    }
+                }
+            }, 500);
+            
+            <!-- ...existing code... -->
+        });
+    </script>
+</body>
+</html>    </script>
+</body>
+</html>
